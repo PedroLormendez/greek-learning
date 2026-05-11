@@ -1,0 +1,39 @@
+:root {
+  --m:#3b6ea5; --f:#9b4f7a; --n:#7a6e2d;
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --m:#6b9fd4; --f:#c97aaa; --n:#b0a050;
+  }
+}
+
+.header-inner { max-width:780px; }
+
+main { max-width:780px; }
+
+.filter-wrap { display:flex; gap:6px; flex-shrink:0; }
+.filter-btn { font-size:12px; padding:5px 10px; border-radius:20px; border:0.5px solid var(--border2); background:var(--bg); color:var(--text2); cursor:pointer; }
+.filter-btn.active-m { background:var(--m); border-color:var(--m); color:#fff; }
+.filter-btn.active-f { background:var(--f); border-color:var(--f); color:#fff; }
+.filter-btn.active-n { background:var(--n); border-color:var(--n); color:#fff; }
+.filter-btn.active-all { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+button.icon-btn { display:inline-flex; align-items:center; gap:5px; font-size:13px; padding:7px 12px; border-radius:var(--radius-sm); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); cursor:pointer; flex-shrink:0; }
+button.icon-btn:hover { background:var(--bg3); }
+button.icon-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+.word-list { display:flex; flex-direction:column; gap:6px; }
+.word-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); padding:12px 14px; display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; }
+@media (min-width:560px) { .word-card { grid-template-columns:200px 1fr 1fr; } }
+
+.word-main { display:flex; align-items:center; gap:8px; }
+.word-greek { font-size:17px; font-weight:500; }
+.gender-badge { font-size:10px; font-weight:600; padding:2px 6px; border-radius:10px; flex-shrink:0; }
+.gender-m { background:color-mix(in srgb, var(--m) 15%, transparent); color:var(--m); }
+.gender-f { background:color-mix(in srgb, var(--f) 15%, transparent); color:var(--f); }
+.gender-n { background:color-mix(in srgb, var(--n) 15%, transparent); color:var(--n); }
+
+.word-plural { font-size:14px; color:var(--text2); align-self:center; }
+.word-translation { font-size:14px; color:var(--text2); align-self:center; font-style:italic; }
+.word-example { font-size:13px; color:var(--text3); grid-column:1/-1; margin-top:4px; }
+.word-notes { font-size:12px; color:var(--text3); grid-column:1/-1; }

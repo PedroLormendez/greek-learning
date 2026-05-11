@@ -1,0 +1,34 @@
+.header-inner { max-width:680px; }
+.header-title { font-size:15px; font-weight:500; white-space:nowrap; }
+
+main { max-width:680px; }
+
+.error-box { text-align:center; }
+
+button { display:inline-flex; align-items:center; gap:5px; font-size:13px; padding:7px 12px; border-radius:var(--radius-sm); border:0.5px solid var(--border2); background:var(--bg); color:var(--text); cursor:pointer; white-space:nowrap; flex-shrink:0; }
+button:hover { background:var(--bg3); }
+button:active { transform:scale(0.98); }
+button:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+
+.verb-list { display:flex; flex-direction:column; gap:6px; }
+.verb-card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+.verb-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; cursor:pointer; user-select:none; transition:background 0.12s; }
+.verb-header:hover { background:var(--bg2); }
+.verb-label { display:flex; align-items:baseline; gap:8px; }
+.verb-name { font-size:16px; font-weight:500; }
+.verb-trans { font-size:13px; color:var(--text2); }
+.chevron { color:var(--text3); transition:transform 0.18s; flex-shrink:0; }
+.verb-card.open .chevron { transform:rotate(180deg); }
+.verb-body { display:none; border-top:0.5px solid var(--border); }
+.verb-card.open .verb-body { display:block; }
+
+.tense-tabs { display:flex; border-bottom:0.5px solid var(--border); }
+.tense-tab { flex:1; padding:8px 4px; font-size:12px; text-align:center; border:none; border-bottom:2px solid transparent; background:none; color:var(--text2); cursor:pointer; border-radius:0; }
+.tense-tab:hover { background:var(--bg2); }
+.tense-tab.active { color:var(--text); font-weight:500; border-bottom-color:var(--accent); }
+
+.conj-table { padding:6px 14px 12px; }
+.conj-row { display:flex; align-items:center; padding:5px 0; border-bottom:0.5px solid var(--border); }
+.conj-row:last-child { border-bottom:none; }
+.person { font-size:13px; color:var(--text3); width:52px; flex-shrink:0; }
+.form { font-size:15px; }
