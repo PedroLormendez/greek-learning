@@ -25,6 +25,15 @@
   header { background:var(--bg); border-bottom:0.5px solid var(--border); padding:0 20px; position:sticky; top:0; z-index:100; }
   .header-inner { max-width:680px; margin:0 auto; display:flex; align-items:center; gap:10px; height:56px; }
   .header-title { font-size:15px; font-weight:500; white-space:nowrap; }
+  a.back { font-size:13px; color:var(--text3); text-decoration:none; flex-shrink:0; }
+  a.back:hover { color:var(--text); }
+
+  /* Page switcher */
+  .page-tabs { display:flex; gap:2px; background:var(--bg2); border-radius:var(--radius-sm); padding:3px; flex-shrink:0; }
+  .page-tab { font-size:12px; padding:4px 10px; border-radius:4px; border:none; background:transparent; color:var(--text2); cursor:pointer; text-decoration:none; display:inline-block; line-height:1.5; }
+  .page-tab.active { background:var(--bg); color:var(--text); font-weight:500; box-shadow:0 0.5px 2px rgba(0,0,0,0.12); }
+  .page-tab:hover:not(.active) { color:var(--text); }
+
   .search-wrap { flex:1; position:relative; }
   .search-wrap svg { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--text3); pointer-events:none; }
   input[type="text"] { width:100%; background:var(--bg2); border:0.5px solid var(--border2); border-radius:var(--radius-sm); padding:7px 10px 7px 30px; font-size:14px; color:var(--text); outline:none; }
@@ -85,7 +94,11 @@
 
 <header>
   <div class="header-inner">
-    <a href="index.html" style="font-size:13px;color:var(--text3);text-decoration:none;flex-shrink:0">← Home</a><span class="header-title">Verbs</span>
+    <a href="index.html" class="back">← Home</a>
+    <div class="page-tabs">
+      <a href="verbs.html" class="page-tab active">Verbs</a>
+      <a href="vocabulary.html" class="page-tab">Vocabulary</a>
+    </div>
     <div class="search-wrap" id="search-wrap" style="display:none">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       <input type="text" id="search" placeholder="Search verbs…" oninput="render()">
@@ -106,18 +119,18 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Config ────────────────────────────────────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbza-4B_lNE3J1ljGTtAIpUFLVtMz95b1Dd8krtPPCjqrHfY68Hubm1EeBRJlWRfe-bS/exec";
+// ── Supabase config ───────────────────────────────────────────────────────
+const SUPABASE_URL = "https://nppqvufmexrwdkkjwccy.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5wcHF2dWZtZXhyd2Rra2p3Y2N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MDQ1MDMsImV4cCI6MjA5NDA4MDUwM30.a8vhhZ1kMIHuLOT6auwzVtGrSS2XI4idMwohl-I_3aI";
 
 const PERSONS = ["εγώ","εσύ","αυτός","εμείς","εσείς","αυτοί"];
-const TENSES  = ["present","subjunctive","future"];
-const LABELS  = {present:"Present", subjunctive:"Subjunctive (να)", future:"Future (θα)"};
+const TENSES  = ["present","subjunctive","future","past"];
+const LABELS  = { present:"Present", subjunctive:"Subjunctive (να)", future:"Future (θα)", past:"Past (αόριστος)" };
 
 let verbs = [];
-let openCards = {};
+let openCards  = {};
 let activeTenses = {};
 
-// ── Toast ─────────────────────────────────────────────────────────────────
 function toast(msg) {
   const el = document.getElementById("toast");
   el.textContent = msg;
@@ -125,22 +138,40 @@ function toast(msg) {
   setTimeout(() => el.classList.remove("show"), 2500);
 }
 
-// ── Sync ──────────────────────────────────────────────────────────────────
+// Transform flat Supabase row → structured verb object
+function transformVerb(row) {
+  return {
+    verb: row.verb,
+    translation: row.english,
+    conjugations: {
+      present:     [row.present_ego,     row.present_esy,     row.present_aytos,     row.present_emeis,     row.present_eseis,     row.present_aytoi],
+      subjunctive: [row.subjunctive_ego, row.subjunctive_esy, row.subjunctive_aytos, row.subjunctive_emeis, row.subjunctive_eseis, row.subjunctive_aytoi],
+      future:      [row.future_ego,      row.future_esy,      row.future_aytos,      row.future_emeis,      row.future_eseis,      row.future_aytoi],
+      past:        [row.past_ego,        row.past_esy,        row.past_aytos,        row.past_emeis,        row.past_eseis,        row.past_aytoi]
+    }
+  };
+}
+
 async function sync() {
   document.getElementById("sync-btn").disabled = true;
   try {
-    const res  = await fetch(SCRIPT_URL);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/verbs?select=*&order=verb`, {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    const list = Array.isArray(data) ? data : [];
-    if (!list.length) throw new Error("Empty response");
-    verbs = list;
+    if (!Array.isArray(data) || !data.length) throw new Error("Empty response");
+    verbs = data.map(transformVerb);
     sessionStorage.setItem("gk_verbs", JSON.stringify(verbs));
     toast(`${verbs.length} verbs loaded`);
     render();
   } catch(e) {
     if (!verbs.length) {
       document.getElementById("main").innerHTML =
-        `<div class="error-box">Could not load verbs. Check your internet connection and try refreshing.</div>`;
+        `<div class="error-box">Could not load verbs. Check your internet connection and try refreshing.<br><small>${e.message}</small></div>`;
     } else {
       toast("Refresh failed — showing cached data");
     }
@@ -149,7 +180,6 @@ async function sync() {
   }
 }
 
-// ── Render ────────────────────────────────────────────────────────────────
 function esc(s) { return s.replace(/\\/g,"\\\\").replace(/'/g,"\\'"); }
 function toggle(id) { openCards[id] = !openCards[id]; render(); }
 function setTense(id,t) { activeTenses[id] = t; render(); }
@@ -158,7 +188,6 @@ function render() {
   const main = document.getElementById("main");
   document.getElementById("search-wrap").style.display = verbs.length ? "" : "none";
   document.getElementById("sync-btn").style.display    = verbs.length ? "" : "none";
-
   if (!verbs.length) return;
 
   const q = (document.getElementById("search").value || "").toLowerCase();
@@ -195,7 +224,7 @@ function render() {
       <div class="verb-list">`;
 
     grouped[letter].forEach(v => {
-      const id = v.verb;
+      const id    = v.verb;
       const isOpen = !!openCards[id];
       const tense  = activeTenses[id] || "present";
       const forms  = v.conjugations[tense] || [];
@@ -219,17 +248,17 @@ function render() {
           </div>
         </div>`;
       }
-
       html += `</div>`;
     });
-
     html += `</div></div>`;
   });
 
   main.innerHTML = html;
 }
 
-// ── Boot ──────────────────────────────────────────────────────────────────
+// Boot
+try { const s = sessionStorage.getItem("gk_verbs"); if (s) verbs = JSON.parse(s); } catch {}
+render();
 sync();
 </script>
 </body>
